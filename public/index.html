@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pixhatch</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 2rem;
+    }
+
+    h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.5px; }
+    h1 span { color: #888; font-weight: 400; font-size: 0.9rem; margin-left: 0.5rem; }
+
+    #drop-zone {
+      width: 100%;
+      max-width: 520px;
+      border: 2px dashed #333;
+      border-radius: 12px;
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      color: #666;
+    }
+
+    #drop-zone.over, #drop-zone:hover {
+      border-color: #555;
+      background: #161616;
+      color: #aaa;
+    }
+
+    #drop-zone svg { margin-bottom: 0.75rem; opacity: 0.5; }
+
+    #drop-zone p { font-size: 0.95rem; }
+    #drop-zone p small { display: block; margin-top: 0.3rem; font-size: 0.8rem; color: #555; }
+
+    #file-input { display: none; }
+
+    .fields {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .fields label { font-size: 0.8rem; color: #666; }
+
+    .fields input {
+      width: 100%;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 0.6rem 0.8rem;
+      color: #e0e0e0;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .fields input:focus { border-color: #444; }
+
+    button {
+      width: 100%;
+      max-width: 520px;
+      background: #1e1e1e;
+      border: 1px solid #2e2e2e;
+      border-radius: 8px;
+      padding: 0.7rem;
+      color: #ccc;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    button:hover:not(:disabled) { background: #262626; color: #fff; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #status {
+      width: 100%;
+      max-width: 520px;
+      font-size: 0.85rem;
+      min-height: 1.2rem;
+      word-break: break-all;
+    }
+
+    #status.error { color: #e05555; }
+    #status.success { color: #55c47a; }
+
+    #result-url {
+      display: none;
+      width: 100%;
+      max-width: 520px;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 0.6rem 0.8rem;
+      font-size: 0.85rem;
+      color: #aaa;
+      word-break: break-all;
+      cursor: pointer;
+    }
+
+    #result-url:hover { border-color: #444; }
+
+    .copy-hint { font-size: 0.75rem; color: #555; text-align: center; }
+  </style>
+</head>
+<body>
+  <h1>Pixhatch <span>image host</span></h1>
+
+  <div id="drop-zone" role="button" tabindex="0" aria-label="Drop files here or click to select">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="17 8 12 3 7 8"/>
+      <line x1="12" y1="3" x2="12" y2="15"/>
+    </svg>
+    <p>Drop image here or click to select<small>Max 50 MB</small></p>
+    <input type="file" id="file-input" accept="image/*,video/*" />
+  </div>
+
+  <div class="fields">
+    <label for="api-key-input">API Key</label>
+    <input type="password" id="api-key-input" placeholder="your-secret-api-key" autocomplete="off" />
+  </div>
+
+  <button id="upload-btn" disabled>Upload</button>
+
+  <div id="status"></div>
+  <input type="text" id="result-url" readonly placeholder="URL will appear here" />
+  <p class="copy-hint" id="copy-hint" style="display:none">Click URL to copy</p>
+
+  <script>
+    const dropZone    = document.getElementById('drop-zone');
+    const fileInput   = document.getElementById('file-input');
+    const apiKeyInput = document.getElementById('api-key-input');
+    const uploadBtn   = document.getElementById('upload-btn');
+    const statusEl    = document.getElementById('status');
+    const resultUrl   = document.getElementById('result-url');
+    const copyHint    = document.getElementById('copy-hint');
+
+    let selectedFile = null;
+
+    function setFile(file) {
+      selectedFile = file;
+      dropZone.querySelector('p').innerHTML =
+        `<strong>${file.name}</strong><small>${(file.size / 1024 / 1024).toFixed(2)} MB</small>`;
+      uploadBtn.disabled = false;
+    }
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) setFile(fileInput.files[0]);
+    });
+
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('over');
+      if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+    });
+
+    uploadBtn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      const key = apiKeyInput.value.trim();
+
+      uploadBtn.disabled = true;
+      statusEl.className = '';
+      statusEl.textContent = 'Uploading...';
+      resultUrl.style.display = 'none';
+      copyHint.style.display = 'none';
+
+      try {
+        const headers = {};
+        if (key) headers['X-API-Key'] = key;
+
+        const res = await fetch('/upload', { method: 'POST', headers, body: formData });
+        const text = await res.text();
+
+        if (!res.ok) {
+          statusEl.className = 'error';
+          statusEl.textContent = `Error ${res.status}: ${text}`;
+        } else {
+          statusEl.className = 'success';
+          statusEl.textContent = 'Uploaded!';
+          resultUrl.value = text;
+          resultUrl.style.display = 'block';
+          copyHint.style.display = 'block';
+        }
+      } catch (err) {
+        statusEl.className = 'error';
+        statusEl.textContent = `Network error: ${err.message}`;
+      } finally {
+        uploadBtn.disabled = false;
+      }
+    });
+
+    resultUrl.addEventListener('click', () => {
+      navigator.clipboard.writeText(resultUrl.value).then(() => {
+        copyHint.textContent = 'Copied!';
+        setTimeout(() => { copyHint.textContent = 'Click URL to copy'; }, 1500);
+      });
+    });
+  </script>
+</body>
+</html>

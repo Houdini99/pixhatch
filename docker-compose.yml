@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  pixhatch:
+    image: pixhatch:latest
+    container_name: pixhatch
+    restart: unless-stopped
+    expose:
+      - "3000"
+    networks:
+      - proxy
+    environment:
+      - API_KEY=replace_with_openssl_rand_hex_32
+      - BASE_URL=https://img.yourdomain.com
+      - PORT=3000
+      - MAX_SIZE_MB=50
+      - RATE_LIMIT_PER_MIN=30
+    volumes:
+      - pixhatch_uploads:/app/uploads
+
+volumes:
+  pixhatch_uploads:
+
+networks:
+  proxy:
+    external: true
