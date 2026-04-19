@@ -135,6 +135,49 @@ app.post('/upload', rateLimit, (req, res) => {
   });
 });
 
+function requireApiKey(req, res, next) {
+  if (!API_KEY) return next();
+  const key = req.headers['x-api-key'] || '';
+  if (!safeEqual(key, API_KEY)) return res.status(401).json({ error: 'Unauthorized' });
+  next();
+}
+
+app.get('/api/media', requireApiKey, (req, res) => {
+  fs.readdir(UPLOAD_DIR, (err, files) => {
+    if (err) return res.status(500).json({ error: 'Cannot read uploads' });
+    const items = [];
+    let pending = files.length;
+    if (pending === 0) return res.json([]);
+    for (const name of files) {
+      const filepath = path.join(UPLOAD_DIR, name);
+      fs.stat(filepath, (statErr, stat) => {
+        if (!statErr && stat.isFile() && ALLOWED_EXT.has(path.extname(name).toLowerCase())) {
+          items.push({ name, size: stat.size, mtime: stat.mtimeMs, url: `${BASE_URL}/uploads/${name}` });
+        }
+        if (--pending === 0) res.json(items);
+      });
+    }
+  });
+});
+
+app.delete('/api/media/:filename', requireApiKey, (req, res) => {
+  const name = path.basename(req.params.filename);
+  if (!ALLOWED_EXT.has(path.extname(name).toLowerCase())) {
+    return res.status(400).json({ error: 'Invalid file' });
+  }
+  const filepath = path.join(UPLOAD_DIR, name);
+  if (!filepath.startsWith(UPLOAD_DIR + path.sep)) {
+    return res.status(400).json({ error: 'Invalid path' });
+  }
+  fs.unlink(filepath, (err) => {
+    if (err) {
+      if (err.code === 'ENOENT') return res.status(404).json({ error: 'Not found' });
+      return res.status(500).json({ error: 'Delete failed' });
+    }
+    res.json({ ok: true });
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Pixhatch listening on port ${PORT}`);
   console.log(`BASE_URL     : ${BASE_URL}`);

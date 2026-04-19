@@ -4,7 +4,7 @@ A self-hosted image and video hosting API. Upload files via a web UI, `curl`, or
 
 ## Features
 
-- Drag-and-drop web UI with dark theme
+- Drag-and-drop web UI with Gallery, dark theme 
 - REST API endpoint — returns a plain URL, easy to script
 - API key authentication (timing-safe comparison)
 - Per-IP rate limiting (in-memory, no Redis required)
@@ -14,6 +14,9 @@ A self-hosted image and video hosting API. Upload files via a web UI, `curl`, or
 - Single Docker image, ~50 MB
 
 ---
+<p align="center">
+  <img src="preview.png" alt="Description" width="600">
+</p>
 
 ## Project structure
 

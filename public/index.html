@@ -7,25 +7,70 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --surface2: #1e1e1e;
+      --border: #2a2a2a;
+      --border-hover: #444;
+      --text: #e0e0e0;
+      --dim: #888;
+      --faint: #555;
+      --green: #55c47a;
+      --red: #e05555;
+    }
+
     body {
       font-family: system-ui, sans-serif;
-      background: #0f0f0f;
-      color: #e0e0e0;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
+      padding: 1.5rem 2rem 4rem;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .logo { font-size: 1.4rem; font-weight: 600; letter-spacing: -0.5px; }
+    .logo span { color: var(--dim); font-weight: 400; font-size: 0.85rem; margin-left: 0.5rem; }
+
+    .header-right { display: flex; gap: 0.5rem; align-items: center; }
+
+    .btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      color: #ccc;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .btn:hover:not(:disabled) { background: #262626; color: #fff; border-color: #3a3a3a; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn.danger { border-color: #3a1a1a; color: #cc5555; }
+    .btn.danger:hover:not(:disabled) { background: #1f1010; color: var(--red); border-color: #502020; }
+    .btn.primary { border-color: #1a3a2a; color: #55c47a; }
+    .btn.primary:hover:not(:disabled) { background: #101f15; color: var(--green); border-color: #25503a; }
+
+    /* Upload section */
+    .upload-wrap {
+      max-width: 520px;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 1.5rem;
-      padding: 2rem;
+      gap: 1rem;
     }
-
-    h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.5px; }
-    h1 span { color: #888; font-weight: 400; font-size: 0.9rem; margin-left: 0.5rem; }
 
     #drop-zone {
       width: 100%;
-      max-width: 520px;
       border: 2px dashed #333;
       border-radius: 12px;
       padding: 3rem 2rem;
@@ -34,77 +79,38 @@
       transition: border-color 0.15s, background 0.15s;
       color: #666;
     }
-
-    #drop-zone.over, #drop-zone:hover {
-      border-color: #555;
-      background: #161616;
-      color: #aaa;
-    }
-
+    #drop-zone.over, #drop-zone:hover { border-color: #555; background: #161616; color: #aaa; }
     #drop-zone svg { margin-bottom: 0.75rem; opacity: 0.5; }
-
     #drop-zone p { font-size: 0.95rem; }
     #drop-zone p small { display: block; margin-top: 0.3rem; font-size: 0.8rem; color: #555; }
-
     #file-input { display: none; }
 
-    .fields {
+    .field-group { width: 100%; display: flex; flex-direction: column; gap: 0.4rem; }
+    .field-group label { font-size: 0.8rem; color: var(--dim); }
+    .field-group input {
       width: 100%;
-      max-width: 520px;
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-    }
-
-    .fields label { font-size: 0.8rem; color: #666; }
-
-    .fields input {
-      width: 100%;
-      background: #1a1a1a;
-      border: 1px solid #2a2a2a;
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 8px;
       padding: 0.6rem 0.8rem;
-      color: #e0e0e0;
+      color: var(--text);
       font-size: 0.9rem;
       outline: none;
       transition: border-color 0.15s;
     }
+    .field-group input:focus { border-color: var(--border-hover); }
 
-    .fields input:focus { border-color: #444; }
+    #upload-btn { width: 100%; }
 
-    button {
-      width: 100%;
-      max-width: 520px;
-      background: #1e1e1e;
-      border: 1px solid #2e2e2e;
-      border-radius: 8px;
-      padding: 0.7rem;
-      color: #ccc;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s;
-    }
-
-    button:hover:not(:disabled) { background: #262626; color: #fff; }
-    button:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    #status {
-      width: 100%;
-      max-width: 520px;
-      font-size: 0.85rem;
-      min-height: 1.2rem;
-      word-break: break-all;
-    }
-
-    #status.error { color: #e05555; }
-    #status.success { color: #55c47a; }
+    #status { width: 100%; font-size: 0.85rem; min-height: 1.2rem; word-break: break-all; }
+    #status.error { color: var(--red); }
+    #status.success { color: var(--green); }
 
     #result-url {
       display: none;
       width: 100%;
-      max-width: 520px;
-      background: #1a1a1a;
-      border: 1px solid #2a2a2a;
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 8px;
       padding: 0.6rem 0.8rem;
       font-size: 0.85rem;
@@ -112,45 +118,303 @@
       word-break: break-all;
       cursor: pointer;
     }
+    #result-url:hover { border-color: var(--border-hover); }
+    .copy-hint { font-size: 0.75rem; color: var(--faint); text-align: center; }
 
-    #result-url:hover { border-color: #444; }
+    /* Divider */
+    .divider {
+      max-width: 1200px;
+      margin: 2.5rem auto;
+      border: none;
+      border-top: 1px solid var(--border);
+    }
 
-    .copy-hint { font-size: 0.75rem; color: #555; text-align: center; }
+    /* Gallery */
+    .gallery-section { max-width: 1200px; margin: 0 auto; }
+    .gallery-section.hidden { display: none; }
+
+    .gallery-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .gallery-title { font-size: 1rem; font-weight: 600; }
+    .gallery-count { color: var(--faint); font-size: 0.82rem; margin-left: 0.4rem; }
+
+    .gallery-controls { display: flex; align-items: center; gap: 0.6rem; }
+
+    select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.45rem 0.7rem;
+      color: var(--text);
+      font-size: 0.85rem;
+      cursor: pointer;
+      outline: none;
+    }
+    select:hover { border-color: var(--border-hover); }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .media-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.15s;
+    }
+    .media-card:hover { border-color: #3a3a3a; }
+
+    .card-preview {
+      aspect-ratio: 1;
+      background: #111;
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+    }
+    .card-preview img, .card-preview video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .video-badge {
+      position: absolute;
+      bottom: 6px;
+      left: 6px;
+      background: rgba(0,0,0,0.7);
+      border-radius: 4px;
+      padding: 2px 5px;
+      font-size: 0.65rem;
+      color: #ccc;
+      pointer-events: none;
+    }
+
+    .card-info {
+      padding: 0.6rem 0.65rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      font-size: 0.75rem;
+    }
+    .card-filename {
+      color: var(--text);
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .card-meta { color: var(--faint); }
+    .card-actions { display: flex; gap: 0.35rem; margin-top: 0.35rem; }
+    .card-actions .btn { flex: 1; padding: 0.4rem 0.5rem; font-size: 0.75rem; text-align: center; }
+
+    .gallery-empty, .gallery-loading {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--faint);
+      font-size: 0.9rem;
+      padding: 3rem;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+
+    .modal {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 1.75rem;
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .modal h2 { font-size: 1rem; font-weight: 600; }
+    .modal p { font-size: 0.85rem; color: var(--dim); }
+    .modal-actions { display: flex; gap: 0.5rem; }
+    .modal-actions .btn { flex: 1; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.ok { color: var(--green); }
+    .toast.err { color: var(--red); }
   </style>
 </head>
 <body>
-  <h1>Pixhatch <span>image host</span></h1>
 
-  <div id="drop-zone" role="button" tabindex="0" aria-label="Drop files here or click to select">
-    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-      <polyline points="17 8 12 3 7 8"/>
-      <line x1="12" y1="3" x2="12" y2="15"/>
-    </svg>
-    <p>Drop image here or click to select<small>Max 50 MB</small></p>
-    <input type="file" id="file-input" accept="image/*,video/*" />
+  <header>
+    <div class="logo">Pixhatch <span>image host</span></div>
+    <div class="header-right">
+      <span id="auth-status" style="font-size:0.8rem;color:var(--faint);display:none"></span>
+      <button class="btn" id="gallery-btn">Gallery</button>
+      <button class="btn danger" id="logout-btn" style="display:none">Logout</button>
+    </div>
+  </header>
+
+  <!-- Upload -->
+  <div class="upload-wrap">
+    <div id="drop-zone" role="button" tabindex="0" aria-label="Drop files here or click to select">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      <p>Drop image / video here or click to select<small>Max 50 MB · png jpg gif webp avif bmp mp4 webm mov</small></p>
+      <input type="file" id="file-input" accept="image/*,video/*" />
+    </div>
+
+    <div class="field-group">
+      <label for="api-key-input">API Key</label>
+      <input type="password" id="api-key-input" placeholder="your-secret-api-key" autocomplete="off" />
+    </div>
+
+    <button class="btn" id="upload-btn" disabled>Upload</button>
+    <div id="status"></div>
+    <input type="text" id="result-url" readonly placeholder="URL will appear here" />
+    <p class="copy-hint" id="copy-hint" style="display:none">Click URL to copy</p>
   </div>
 
-  <div class="fields">
-    <label for="api-key-input">API Key</label>
-    <input type="password" id="api-key-input" placeholder="your-secret-api-key" autocomplete="off" />
+  <hr class="divider" id="divider" style="display:none" />
+
+  <!-- Gallery -->
+  <section class="gallery-section hidden" id="gallery-section">
+    <div class="gallery-header">
+      <div>
+        <span class="gallery-title">Gallery</span>
+        <span class="gallery-count" id="gallery-count"></span>
+      </div>
+      <div class="gallery-controls">
+        <select id="sort-select">
+          <option value="date-desc">Newest first</option>
+          <option value="date-asc">Oldest first</option>
+          <option value="name-asc">Name A–Z</option>
+          <option value="name-desc">Name Z–A</option>
+          <option value="size-desc">Largest first</option>
+          <option value="size-asc">Smallest first</option>
+        </select>
+        <button class="btn" id="refresh-btn">Refresh</button>
+      </div>
+    </div>
+    <div class="gallery-grid" id="gallery-grid">
+      <div class="gallery-loading">Loading…</div>
+    </div>
+  </section>
+
+  <!-- Login modal -->
+  <div class="modal-overlay" id="login-modal">
+    <div class="modal">
+      <h2>Gallery Login</h2>
+      <p>Enter your API key to view and manage your uploaded media.</p>
+      <div class="field-group">
+        <label for="modal-key-input">API Key</label>
+        <input type="password" id="modal-key-input" placeholder="your-secret-api-key" autocomplete="off" />
+      </div>
+      <div id="modal-error" style="font-size:0.8rem;color:var(--red);display:none"></div>
+      <div class="modal-actions">
+        <button class="btn primary" id="modal-login-btn">Login</button>
+        <button class="btn" id="modal-cancel-btn">Cancel</button>
+      </div>
+    </div>
   </div>
 
-  <button id="upload-btn" disabled>Upload</button>
-
-  <div id="status"></div>
-  <input type="text" id="result-url" readonly placeholder="URL will appear here" />
-  <p class="copy-hint" id="copy-hint" style="display:none">Click URL to copy</p>
+  <div class="toast" id="toast"></div>
 
   <script>
-    const dropZone    = document.getElementById('drop-zone');
-    const fileInput   = document.getElementById('file-input');
-    const apiKeyInput = document.getElementById('api-key-input');
-    const uploadBtn   = document.getElementById('upload-btn');
-    const statusEl    = document.getElementById('status');
-    const resultUrl   = document.getElementById('result-url');
-    const copyHint    = document.getElementById('copy-hint');
+    const KEY_STORAGE = 'pixhatch_api_key';
+    let storedKey = localStorage.getItem(KEY_STORAGE) || '';
+    let mediaItems = [];
 
+    const dropZone       = document.getElementById('drop-zone');
+    const fileInput      = document.getElementById('file-input');
+    const apiKeyInput    = document.getElementById('api-key-input');
+    const uploadBtn      = document.getElementById('upload-btn');
+    const statusEl       = document.getElementById('status');
+    const resultUrl      = document.getElementById('result-url');
+    const copyHint       = document.getElementById('copy-hint');
+    const galleryBtn     = document.getElementById('gallery-btn');
+    const logoutBtn      = document.getElementById('logout-btn');
+    const authStatus     = document.getElementById('auth-status');
+    const gallerySection = document.getElementById('gallery-section');
+    const galleryGrid    = document.getElementById('gallery-grid');
+    const galleryCount   = document.getElementById('gallery-count');
+    const sortSelect     = document.getElementById('sort-select');
+    const refreshBtn     = document.getElementById('refresh-btn');
+    const divider        = document.getElementById('divider');
+    const loginModal     = document.getElementById('login-modal');
+    const modalKeyInput  = document.getElementById('modal-key-input');
+    const modalLoginBtn  = document.getElementById('modal-login-btn');
+    const modalCancelBtn = document.getElementById('modal-cancel-btn');
+    const modalError     = document.getElementById('modal-error');
+    const toastEl        = document.getElementById('toast');
+
+    // ---- Toast ----
+    let toastTimer;
+    function toast(msg, type = '') {
+      toastEl.textContent = msg;
+      toastEl.className = 'toast show' + (type ? ' ' + type : '');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { toastEl.className = 'toast'; }, 2500);
+    }
+
+    // ---- Auth ----
+    function applyKey(key) {
+      storedKey = key;
+      if (key) {
+        localStorage.setItem(KEY_STORAGE, key);
+        apiKeyInput.value = key;
+        authStatus.textContent = 'Authenticated';
+        authStatus.style.display = 'inline';
+        logoutBtn.style.display = 'inline';
+      } else {
+        localStorage.removeItem(KEY_STORAGE);
+        authStatus.style.display = 'none';
+        logoutBtn.style.display = 'none';
+      }
+    }
+
+    logoutBtn.addEventListener('click', () => {
+      applyKey('');
+      hideGallery();
+    });
+
+    // ---- Upload ----
     let selectedFile = null;
 
     function setFile(file) {
@@ -162,11 +426,7 @@
 
     dropZone.addEventListener('click', () => fileInput.click());
     dropZone.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
-
-    fileInput.addEventListener('change', () => {
-      if (fileInput.files[0]) setFile(fileInput.files[0]);
-    });
-
+    fileInput.addEventListener('change', () => { if (fileInput.files[0]) setFile(fileInput.files[0]); });
     dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
     dropZone.addEventListener('drop', e => {
@@ -177,22 +437,19 @@
 
     uploadBtn.addEventListener('click', async () => {
       if (!selectedFile) return;
-
       const formData = new FormData();
       formData.append('file', selectedFile);
-
       const key = apiKeyInput.value.trim();
 
       uploadBtn.disabled = true;
       statusEl.className = '';
-      statusEl.textContent = 'Uploading...';
+      statusEl.textContent = 'Uploading…';
       resultUrl.style.display = 'none';
       copyHint.style.display = 'none';
 
       try {
         const headers = {};
         if (key) headers['X-API-Key'] = key;
-
         const res = await fetch('/upload', { method: 'POST', headers, body: formData });
         const text = await res.text();
 
@@ -205,6 +462,7 @@
           resultUrl.value = text;
           resultUrl.style.display = 'block';
           copyHint.style.display = 'block';
+          if (!gallerySection.classList.contains('hidden')) loadGallery();
         }
       } catch (err) {
         statusEl.className = 'error';
@@ -220,6 +478,243 @@
         setTimeout(() => { copyHint.textContent = 'Click URL to copy'; }, 1500);
       });
     });
+
+    // ---- Gallery ----
+    const VIDEO_EXTS = new Set(['.mp4', '.webm', '.mov', '.m4v']);
+
+    const lazyObserver = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const preview = entry.target;
+        const img = preview.querySelector('img[data-src]');
+        const vid = preview.querySelector('video[data-src]');
+        if (img) { img.src = img.dataset.src; delete img.dataset.src; }
+        if (vid) { vid.src = vid.dataset.src; delete vid.dataset.src; }
+        lazyObserver.unobserve(preview);
+      }
+    }, { rootMargin: '200px 0px' });
+
+    function showGallery() {
+      gallerySection.classList.remove('hidden');
+      divider.style.display = 'block';
+      galleryBtn.textContent = 'Hide Gallery';
+      loadGallery();
+    }
+
+    function hideGallery() {
+      gallerySection.classList.add('hidden');
+      divider.style.display = 'none';
+      galleryBtn.textContent = 'Gallery';
+      mediaItems = [];
+    }
+
+    galleryBtn.addEventListener('click', () => {
+      if (!gallerySection.classList.contains('hidden')) { hideGallery(); return; }
+      tryOpenGallery();
+    });
+
+    refreshBtn.addEventListener('click', loadGallery);
+    sortSelect.addEventListener('change', renderGallery);
+
+    async function tryOpenGallery() {
+      const ok = await fetchMedia(storedKey);
+      if (ok) {
+        if (storedKey) applyKey(storedKey);
+        showGallery();
+      } else {
+        showLoginModal();
+      }
+    }
+
+    function showLoginModal() {
+      modalKeyInput.value = '';
+      modalError.style.display = 'none';
+      loginModal.classList.add('show');
+      setTimeout(() => modalKeyInput.focus(), 50);
+    }
+
+    function hideLoginModal() { loginModal.classList.remove('show'); }
+
+    modalCancelBtn.addEventListener('click', hideLoginModal);
+    loginModal.addEventListener('click', e => { if (e.target === loginModal) hideLoginModal(); });
+
+    modalLoginBtn.addEventListener('click', async () => {
+      const key = modalKeyInput.value.trim();
+      modalLoginBtn.disabled = true;
+      const ok = await fetchMedia(key);
+      modalLoginBtn.disabled = false;
+      if (ok) {
+        applyKey(key);
+        hideLoginModal();
+        showGallery();
+      } else {
+        modalError.textContent = 'Invalid API key or server error.';
+        modalError.style.display = 'block';
+      }
+    });
+
+    modalKeyInput.addEventListener('keydown', e => { if (e.key === 'Enter') modalLoginBtn.click(); });
+
+    async function fetchMedia(key) {
+      try {
+        const headers = {};
+        if (key) headers['X-API-Key'] = key;
+        const res = await fetch('/api/media', { headers });
+        if (!res.ok) return false;
+        mediaItems = await res.json();
+        return true;
+      } catch { return false; }
+    }
+
+    async function loadGallery() {
+      galleryGrid.innerHTML = '<div class="gallery-loading">Loading…</div>';
+      const ok = await fetchMedia(storedKey);
+      if (!ok) {
+        galleryGrid.innerHTML = '<div class="gallery-empty">Failed to load media.</div>';
+        return;
+      }
+      renderGallery();
+    }
+
+    function sortItems(items) {
+      return [...items].sort((a, b) => {
+        switch (sortSelect.value) {
+          case 'date-desc': return b.mtime - a.mtime;
+          case 'date-asc':  return a.mtime - b.mtime;
+          case 'name-asc':  return a.name.localeCompare(b.name);
+          case 'name-desc': return b.name.localeCompare(a.name);
+          case 'size-desc': return b.size - a.size;
+          case 'size-asc':  return a.size - b.size;
+          default: return 0;
+        }
+      });
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+    }
+
+    function formatDate(ms) {
+      const d = new Date(ms);
+      return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+        + ' ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function renderGallery() {
+      const sorted = sortItems(mediaItems);
+      galleryCount.textContent = sorted.length === 1 ? '1 item' : `${sorted.length} items`;
+
+      if (sorted.length === 0) {
+        galleryGrid.innerHTML = '<div class="gallery-empty">No uploads yet.</div>';
+        return;
+      }
+
+      galleryGrid.innerHTML = '';
+      for (const item of sorted) galleryGrid.appendChild(buildCard(item));
+    }
+
+    function buildCard(item) {
+      const ext = '.' + item.name.split('.').pop().toLowerCase();
+      const isVideo = VIDEO_EXTS.has(ext);
+
+      const card = document.createElement('div');
+      card.className = 'media-card';
+
+      const preview = document.createElement('div');
+      preview.className = 'card-preview';
+      preview.title = 'Open in new tab';
+      preview.addEventListener('click', () => window.open(item.url, '_blank'));
+
+      if (isVideo) {
+        const vid = document.createElement('video');
+        vid.dataset.src = item.url;
+        vid.muted = true;
+        vid.loop = true;
+        vid.preload = 'none';
+        vid.addEventListener('mouseenter', () => { if (vid.src) vid.play(); });
+        vid.addEventListener('mouseleave', () => { vid.pause(); vid.currentTime = 0; });
+        preview.appendChild(vid);
+        const badge = document.createElement('span');
+        badge.className = 'video-badge';
+        badge.textContent = ext.slice(1).toUpperCase();
+        preview.appendChild(badge);
+      } else {
+        const img = document.createElement('img');
+        img.dataset.src = item.url;
+        img.alt = item.name;
+        preview.appendChild(img);
+      }
+      lazyObserver.observe(preview);
+
+      const info = document.createElement('div');
+      info.className = 'card-info';
+
+      const fname = document.createElement('div');
+      fname.className = 'card-filename';
+      fname.textContent = item.name;
+      fname.title = item.name;
+
+      const meta = document.createElement('div');
+      meta.className = 'card-meta';
+      meta.textContent = `${formatDate(item.mtime)} · ${formatSize(item.size)}`;
+
+      const actions = document.createElement('div');
+      actions.className = 'card-actions';
+
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'btn';
+      copyBtn.textContent = 'Copy URL';
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(item.url).then(() => {
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => { copyBtn.textContent = 'Copy URL'; }, 1500);
+        });
+      });
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn danger';
+      delBtn.textContent = 'Delete';
+      delBtn.addEventListener('click', () => deleteMedia(item, card));
+
+      actions.appendChild(copyBtn);
+      actions.appendChild(delBtn);
+      info.appendChild(fname);
+      info.appendChild(meta);
+      info.appendChild(actions);
+      card.appendChild(preview);
+      card.appendChild(info);
+      return card;
+    }
+
+    async function deleteMedia(item, card) {
+      if (!confirm(`Delete "${item.name}"?`)) return;
+      try {
+        const headers = {};
+        if (storedKey) headers['X-API-Key'] = storedKey;
+        const res = await fetch('/api/media/' + encodeURIComponent(item.name), { method: 'DELETE', headers });
+        if (res.ok) {
+          card.style.transition = 'opacity 0.3s';
+          card.style.opacity = '0';
+          setTimeout(() => card.remove(), 300);
+          mediaItems = mediaItems.filter(m => m.name !== item.name);
+          galleryCount.textContent = mediaItems.length === 1 ? '1 item' : `${mediaItems.length} items`;
+          toast('Deleted', 'ok');
+        } else {
+          const body = await res.json().catch(() => ({}));
+          toast(body.error || 'Delete failed', 'err');
+        }
+      } catch { toast('Network error', 'err'); }
+    }
+
+    // ---- Init ----
+    if (storedKey) {
+      apiKeyInput.value = storedKey;
+      authStatus.textContent = 'Authenticated';
+      authStatus.style.display = 'inline';
+      logoutBtn.style.display = 'inline';
+    }
   </script>
 </body>
 </html>
