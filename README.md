@@ -2,6 +2,9 @@
 
 A self-hosted image and video hosting API. Upload files via a web UI, `curl`, or any HTTP client and get back a direct URL. Designed to run behind a reverse proxy (Nginx Proxy Manager) on a VPS.
 
+> [!NOTE]
+> AI helps me build this stuff. 🤖✨ I check over everything and try to squash bugs as fast as possible. Not a master, just building and learning!
+
 ## Features
 
 - Drag-and-drop web UI with Gallery, dark theme 
